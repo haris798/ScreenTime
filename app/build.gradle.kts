@@ -22,10 +22,13 @@ android {
 
     signingConfigs {
         create("release") {
-            System.getenv("ANDROID_KEY_STORE_FILE")?.let { storeFile = file(it) }
-            System.getenv("ANDROID_KEY_STORE_PASSWORD")?.let { storePassword = it }
-            System.getenv("ANDROID_KEY_ALIAS")?.let { keyAlias = it }
-            System.getenv("ANDROID_KEY_PASSWORD")?.let { keyPassword = it }
+            val keyStoreFilePath = System.getenv("ANDROID_KEY_STORE_FILE")
+            if (!keyStoreFilePath.isNullOrEmpty() && file(keyStoreFilePath).exists()) {
+                storeFile = file(keyStoreFilePath)
+                storePassword = System.getenv("ANDROID_KEY_STORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            }
         }
     }
 
@@ -50,7 +53,12 @@ android {
     productFlavors {
         create("default") {
             dimension = "version"
-            signingConfig = signingConfigs.getByName("release")
+            val releaseConfig = signingConfigs.getByName("release")
+            signingConfig = if (releaseConfig.storeFile != null) {
+                releaseConfig
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
         create("gplay") {
             dimension = "version"
