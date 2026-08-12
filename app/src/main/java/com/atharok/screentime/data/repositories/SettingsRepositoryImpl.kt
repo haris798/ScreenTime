@@ -63,4 +63,10 @@ class SettingsRepositoryImpl(
     override suspend fun saveSupabaseLastSync(timestamp: Long) {
         settingsDataStore.saveSupabaseLastSync(timestamp)
     }
+
+    override fun getDeviceName(): Flow<String> = settingsDataStore.deviceNameFlow
+
+    override suspend fun saveDeviceName(name: String) {
+        settingsDataStore.saveDeviceName(name)
+    }
 }

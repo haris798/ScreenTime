@@ -31,4 +31,7 @@ interface SettingsRepository {
 
     fun getSupabaseLastSync(): Flow<Long>
     suspend fun saveSupabaseLastSync(timestamp: Long)
+
+    fun getDeviceName(): Flow<String>
+    suspend fun saveDeviceName(name: String)
 }

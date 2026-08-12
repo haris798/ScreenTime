@@ -31,6 +31,7 @@ class SettingsDataStore(private val context: Context) {
         private const val SUPABASE_PASSWORD_KEY = "supabase_password_key"
         private const val SUPABASE_IS_CONNECTED_KEY = "supabase_is_connected_key"
         private const val SUPABASE_LAST_SYNC_KEY = "supabase_last_sync_key"
+        private const val DEVICE_NAME_KEY = "device_name_key"
     }
 
     private val themeKey = stringPreferencesKey(THEME_KEY)
@@ -45,6 +46,7 @@ class SettingsDataStore(private val context: Context) {
     private val supabasePasswordKey = stringPreferencesKey(SUPABASE_PASSWORD_KEY)
     private val supabaseIsConnectedKey = booleanPreferencesKey(SUPABASE_IS_CONNECTED_KEY)
     private val supabaseLastSyncKey = androidx.datastore.preferences.core.longPreferencesKey(SUPABASE_LAST_SYNC_KEY)
+    private val deviceNameKey = stringPreferencesKey(DEVICE_NAME_KEY)
 
     private fun Flow<Preferences>.catchException(): Flow<Preferences> = this.catch {
         if (it is IOException) {
@@ -198,6 +200,20 @@ class SettingsDataStore(private val context: Context) {
     suspend fun saveSupabaseLastSync(timestamp: Long) {
         context.dataStore.edit {
             it[supabaseLastSyncKey] = timestamp
+        }
+    }
+
+    // ---- Device Info ----
+
+    val deviceNameFlow: Flow<String> = context.dataStore.data
+        .catchException()
+        .map { preferences ->
+            preferences[deviceNameKey] ?: "${android.os.Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${android.os.Build.MODEL}"
+        }
+
+    suspend fun saveDeviceName(name: String) {
+        context.dataStore.edit {
+            it[deviceNameKey] = name
         }
     }
 }

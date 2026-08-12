@@ -52,10 +52,13 @@ class SupabaseSyncWorker(
                 Triple(app.packageName, app.appName, app.getTotalTimeUsed())
             }
 
+            val deviceName = settingsUseCase.getDeviceName().first()
+
             val success = supabaseClient.upsertUsageData(
                 context = applicationContext,
                 credentials = credentials,
-                appUsages = appUsages
+                appUsages = appUsages,
+                customDeviceName = deviceName
             ).getOrDefault(false)
 
             if (success) {

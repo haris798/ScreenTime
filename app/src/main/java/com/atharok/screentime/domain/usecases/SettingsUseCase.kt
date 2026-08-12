@@ -51,4 +51,9 @@ class SettingsUseCase(private val repository: SettingsRepository) {
     suspend fun saveSupabaseLastSync(timestamp: Long) {
         repository.saveSupabaseLastSync(timestamp)
     }
+
+    fun getDeviceName(): Flow<String> = repository.getDeviceName()
+    suspend fun saveDeviceName(name: String) {
+        repository.saveDeviceName(name)
+    }
 }

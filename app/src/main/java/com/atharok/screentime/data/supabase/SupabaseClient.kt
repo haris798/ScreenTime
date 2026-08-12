@@ -49,14 +49,19 @@ class SupabaseClient {
     suspend fun upsertUsageData(
         context: Context,
         credentials: SupabaseCredentials,
-        appUsages: List<Triple<String, String, Long>> // packageName, appName, totalTimeUsed
+        appUsages: List<Triple<String, String, Long>>, // packageName, appName, totalTimeUsed
+        customDeviceName: String? = null
     ): Result<Boolean> = withContext(Dispatchers.IO) {
         runCatching {
             if (credentials.url.isBlank() || credentials.anonKey.isBlank()) {
                 return@runCatching false
             }
 
-            val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: "unknown_device"
+            val deviceId = if (!customDeviceName.isNullOrBlank()) {
+                customDeviceName
+            } else {
+                Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID) ?: "unknown_device"
+            }
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
                 timeZone = TimeZone.getDefault()
             }

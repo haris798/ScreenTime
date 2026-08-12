@@ -194,6 +194,25 @@ fun SettingsScreen(
                     )
             )
 
+            val deviceName: String by settingsViewModel.deviceName.collectAsStateWithLifecycle(initialValue = "")
+            var deviceNameInput by remember(deviceName) { mutableStateOf(deviceName) }
+
+            androidx.compose.material3.OutlinedTextField(
+                value = deviceNameInput,
+                onValueChange = {
+                    deviceNameInput = it
+                    settingsViewModel.saveDeviceName(it)
+                },
+                label = { androidx.compose.material3.Text("Nama Perangkat (Device Name)") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = horizontalPadding,
+                        vertical = verticalPadding
+                    ),
+                singleLine = true
+            )
+
             SettingsText(
                 text = stringResource(id = R.string.manage_apps_to_ignore),
                 modifier = Modifier

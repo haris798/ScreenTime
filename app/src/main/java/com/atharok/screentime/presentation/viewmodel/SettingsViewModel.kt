@@ -41,4 +41,9 @@ class SettingsViewModel(
     fun saveIgnoredPackages(ignoredPackages: List<String>) = viewModelScope.launch {
         useCase.saveIgnoredPackages(ignoredPackages)
     }
+
+    val deviceName: Flow<String> get() = useCase.getDeviceName()
+    fun saveDeviceName(name: String) = viewModelScope.launch {
+        useCase.saveDeviceName(name)
+    }
 }
