@@ -123,26 +123,11 @@ private fun StatelessDeviceUsageScreen(
             SettingsAction(openSettingsScreen = openSettingsScreen)
         }
     ) { innerPadding ->
-
-        //val configuration = LocalConfiguration.current
-        //val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
-        /*if(isLandscape) {
-            LandscapeDeviceUsageScreen(
-                period = period,
-                onPeriodChange = onPeriodChange,
-                dayIndex = dayIndex,
-                onDayIndexChange = onDayIndexChange,
-                deviceUsageResource = deviceUsageResource,
-                openApplicationUsageScreen = openApplicationUsageScreen,
-                innerPadding = innerPadding
-            )
-        } else {*/
-            PortraitDeviceUsageScreen(
-                period = period,
-                onPeriodChange = onPeriodChange,
-                dayIndex = dayIndex,
-                onDayIndexChange = onDayIndexChange,
+        PortraitDeviceUsageScreen(
+            period = period,
+            onPeriodChange = onPeriodChange,
+            dayIndex = dayIndex,
+            onDayIndexChange = onDayIndexChange,
                 selectedCentralTendency = selectedCentralTendency,
                 onSelectedCentralTendencyChange = onSelectedCentralTendencyChange,
                 deviceUsageResource = deviceUsageResource,
@@ -234,81 +219,6 @@ private fun PortraitDeviceUsageScreen(
         }
     }
 }
-
-/*@Composable
-private fun LandscapeDeviceUsageScreen(
-    period: Period,
-    onPeriodChange: (Period) -> Unit,
-    dayIndex: Int,
-    onDayIndexChange: (Int) -> Unit,
-    deviceUsageResource: Resource<DeviceUsage<*>>,
-    openApplicationUsageScreen: (appPackageName: String) -> Unit,
-    innerPadding: PaddingValues,
-    modifier: Modifier = Modifier
-) {
-    LazyVerticalStaggeredGrid (
-        columns = StaggeredGridCells.Fixed(2),
-        modifier = modifier,
-        contentPadding = innerPadding
-    ) {
-        item(span = StaggeredGridItemSpan.FullLine) {
-            PeriodSelector(
-                period = period,
-                onPeriodChange = onPeriodChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(dimensionResource(id = R.dimen.padding_medium))
-            )
-        }
-
-        when(deviceUsageResource) {
-            is Resource.Failure -> {
-                item(span = StaggeredGridItemSpan.FullLine) {
-                    FailureView(deviceUsageResource.throwable.toString())
-                }
-            }
-            is Resource.Progress -> {
-                item(span = StaggeredGridItemSpan.FullLine) {
-                    LoadingDialog(
-                        title = stringResource(id = R.string.calculating),
-                        message = stringResource(id = R.string.calculating_message)
-                    )
-                }
-            }
-            is Resource.Success -> {
-                val deviceUsage: DeviceUsage<*> = deviceUsageResource.data
-
-                item {
-                    TotalUsageView(
-                        period = period,
-                        dayIndex = dayIndex,
-                        onDayIndexChange = onDayIndexChange,
-                        deviceUsage = deviceUsage,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = dimensionResource(id = R.dimen.padding_medium))
-                    )
-                }
-
-                items(deviceUsage.appUsageList) { appUsage ->
-                    ApplicationUsageItem(
-                        packageName = appUsage.packageName,
-                        appName = appUsage.appName,
-                        appIcon = appUsage.appIcon,
-                        timeUsed = appUsage.getTotalTimeUsed(),
-                        percentUsed = appUsage.getPercentUsed(deviceUsage.getTotalTimeUsed()),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable {
-                                openApplicationUsageScreen(appUsage.packageName)
-                            }
-                            .padding(dimensionResource(id = R.dimen.padding_large))
-                    )
-                }
-            }
-        }
-    }
-}*/
 
 @Composable
 private fun FailureView(exceptionMessage: String) {

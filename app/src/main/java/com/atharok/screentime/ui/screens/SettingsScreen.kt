@@ -479,7 +479,7 @@ private fun SettingsSwitch(
 
         Switch(
             checked = checked,
-            onCheckedChange = null//onCheckedChange
+            onCheckedChange = null
         )
     }
 }
