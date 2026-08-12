@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -82,7 +83,7 @@ fun SupabaseStatusAction(
         modifier = modifier
     ) {
         Icon(
-            imageVector = androidx.compose.material.icons.Icons.Rounded.Storage,
+            imageVector = Icons.Rounded.Storage,
             contentDescription = "Supabase Status",
             tint = if (isConnected) androidx.compose.ui.graphics.Color(0xFF4CAF50) else androidx.compose.material3.LocalContentColor.current
         )

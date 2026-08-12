@@ -26,6 +26,7 @@ import com.atharok.screentime.domain.usecases.SettingsUseCase
 import com.atharok.screentime.presentation.viewmodel.DeviceUsageViewModel
 import com.atharok.screentime.presentation.viewmodel.InstalledPackagesViewModel
 import com.atharok.screentime.presentation.viewmodel.SettingsViewModel
+import com.atharok.screentime.presentation.viewmodel.SupabaseViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel

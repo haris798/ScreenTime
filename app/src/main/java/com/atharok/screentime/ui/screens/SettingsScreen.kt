@@ -20,8 +20,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.DisplaySettings
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.ui.unit.dp
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -531,7 +534,7 @@ private fun SupabaseSettingsSection(
         ) {
             SettingsTitle(
                 text = "Koneksi Supabase",
-                icon = androidx.compose.material.icons.Icons.Rounded.Storage,
+                icon = Icons.Rounded.Storage,
                 iconDescription = "Supabase Settings",
                 modifier = Modifier.weight(1f)
             )
@@ -540,7 +543,7 @@ private fun SupabaseSettingsSection(
                 onClick = { showJsonImportDialog = true }
             ) {
                 androidx.compose.material3.Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Rounded.CloudDownload,
+                    imageVector = Icons.Rounded.CloudDownload,
                     contentDescription = "Impor Kredensial JSON",
                     tint = MaterialTheme.colorScheme.primary
                 )

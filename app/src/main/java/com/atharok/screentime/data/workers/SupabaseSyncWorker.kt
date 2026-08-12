@@ -44,26 +44,25 @@ class SupabaseSyncWorker(
             }
 
             // Fetch today's usage stats
-            val deviceUsage = deviceUsageRepository.calculateDayDeviceUsage(0)
-            if (deviceUsage is DeviceUsage<*>) {
-                val appUsages = deviceUsage.appUsageList.map { app ->
-                    Triple(app.packageName, app.appName, app.getTotalTimeUsed())
-                }
+            val now = System.currentTimeMillis()
+            val timeInterval = com.atharok.screentime.common.utils.DateTimeUtils.computeDayIntervalFrom(now, 0)
+            val dayTimestamp = com.atharok.screentime.common.utils.DateTimeUtils.truncateToDay(now)
+            val dailyUsage = deviceUsageRepository.getDayDeviceUsage(timeInterval, dayTimestamp)
+            val appUsages = dailyUsage.appUsageList.map { app ->
+                Triple(app.packageName, app.appName, app.getTotalTimeUsed())
+            }
 
-                val success = supabaseClient.upsertUsageData(
-                    context = applicationContext,
-                    credentials = credentials,
-                    appUsages = appUsages
-                ).getOrDefault(false)
+            val success = supabaseClient.upsertUsageData(
+                context = applicationContext,
+                credentials = credentials,
+                appUsages = appUsages
+            ).getOrDefault(false)
 
-                if (success) {
-                    settingsUseCase.saveSupabaseLastSync(System.currentTimeMillis())
-                    Result.success()
-                } else {
-                    Result.retry()
-                }
-            } else {
+            if (success) {
+                settingsUseCase.saveSupabaseLastSync(System.currentTimeMillis())
                 Result.success()
+            } else {
+                Result.retry()
             }
         } catch (e: Exception) {
             e.printStackTrace()
