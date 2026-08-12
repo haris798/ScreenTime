@@ -36,4 +36,19 @@ class SettingsUseCase(private val repository: SettingsRepository) {
     suspend fun saveIgnoredPackages(ignoredPackages: List<String>) {
         repository.saveIgnoredPackages(ignoredPackages)
     }
+
+    fun getSupabaseCredentials(): Flow<com.atharok.screentime.domain.entities.SupabaseCredentials> = repository.getSupabaseCredentials()
+    suspend fun saveSupabaseCredentials(credentials: com.atharok.screentime.domain.entities.SupabaseCredentials) {
+        repository.saveSupabaseCredentials(credentials)
+    }
+
+    fun isSupabaseConnected(): Flow<Boolean> = repository.isSupabaseConnected()
+    suspend fun saveSupabaseIsConnected(isConnected: Boolean) {
+        repository.saveSupabaseIsConnected(isConnected)
+    }
+
+    fun getSupabaseLastSync(): Flow<Long> = repository.getSupabaseLastSync()
+    suspend fun saveSupabaseLastSync(timestamp: Long) {
+        repository.saveSupabaseLastSync(timestamp)
+    }
 }

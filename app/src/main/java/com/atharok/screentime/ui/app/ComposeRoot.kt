@@ -30,6 +30,7 @@ fun ComposeRoot(
     navController: NavHostController = rememberNavController(),
     deviceUsageViewModel: DeviceUsageViewModel = koinViewModel(),
     settingsViewModel: SettingsViewModel = koinViewModel(),
+    supabaseViewModel: com.atharok.screentime.presentation.viewmodel.SupabaseViewModel = koinViewModel(),
     openSettings: () -> Unit = {
         navController.navigateTo(AppNavDestination.SettingsDestination.route)
     }
@@ -67,6 +68,7 @@ fun ComposeRoot(
                 deviceUsageScreen = {
                     DeviceUsageScreen(
                         viewModel = deviceUsageViewModel,
+                        supabaseViewModel = supabaseViewModel,
                         openApplicationUsageScreen = { appPackageName: String ->
                             navController.navigateTo(
                                 "${AppNavDestination.ApplicationUsageDestination.route}/$appPackageName"
@@ -101,6 +103,7 @@ fun ComposeRoot(
                             navController.navigateTo(AppNavDestination.ThirdLibrariesDestination.route)
                         },
                         settingsViewModel = settingsViewModel,
+                        supabaseViewModel = supabaseViewModel,
                         modifier = Modifier
                     )
                 },

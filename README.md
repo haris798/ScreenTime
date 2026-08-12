@@ -23,10 +23,13 @@ Features:
 - Comparative graph displaying screen time for each hour of the day.
 - Ability to view screen time and comparative graphs for each individual app.
 - Comparative list of screen time for each app, sorted from the most used to the least used during the chosen period.
+- **Supabase Cloud Sync & Auto-Backup**: Periodic background auto-sync using WorkManager with PostgREST UPSERT deduplication (no duplicate records).
+- **One-Click Supabase JSON Credentials Import**: Quick import and preset loader for Supabase credentials (URL, Anon Key, Email, Password).
+- **Dashboard Supabase Status Indicator**: Green barrel database icon in top app bar showing real-time online connection status.
+- **Automated GitHub Actions CI/CD**: Automated Android APK build workflow on GitHub Actions.
 - Simple and modern interface.
 - Home screen widget.
 - No ads.
-- No data collection (internet permissions disabled).
 - Open source.
 - Developed in Kotlin with Jetpack Compose and Material 3.
 

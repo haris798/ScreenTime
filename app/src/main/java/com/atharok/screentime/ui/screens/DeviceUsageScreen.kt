@@ -47,12 +47,14 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 @Composable
 fun DeviceUsageScreen(
     viewModel: DeviceUsageViewModel,
+    supabaseViewModel: com.atharok.screentime.presentation.viewmodel.SupabaseViewModel,
     openApplicationUsageScreen: (appPackageName: String) -> Unit,
     openSettingsScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-
+    val context = androidx.compose.ui.platform.LocalContext.current
     val deviceUsageResource: Resource<DeviceUsage<*>> by viewModel.getDeviceUsageFlow().collectAsStateWithLifecycle()
+    val isSupabaseConnected by supabaseViewModel.isConnectedFlow.collectAsStateWithLifecycle(initialValue = false)
 
     LaunchedEffect(viewModel.periodState.value, viewModel.dayIndexState.intValue) {
         when(viewModel.periodState.value) {
@@ -75,6 +77,11 @@ fun DeviceUsageScreen(
             viewModel.selectedCentralTendency.value = it
         },
         deviceUsageResource = deviceUsageResource,
+        isSupabaseConnected = isSupabaseConnected,
+        onSupabaseClick = {
+            supabaseViewModel.testConnection()
+            supabaseViewModel.triggerManualSync(context)
+        },
         openApplicationUsageScreen = openApplicationUsageScreen,
         openSettingsScreen = openSettingsScreen,
         refresh = {
@@ -96,6 +103,8 @@ private fun StatelessDeviceUsageScreen(
     selectedCentralTendency: CentralTendency,
     onSelectedCentralTendencyChange: (CentralTendency) -> Unit,
     deviceUsageResource: Resource<DeviceUsage<*>>,
+    isSupabaseConnected: Boolean,
+    onSupabaseClick: () -> Unit,
     openApplicationUsageScreen: (appPackageName: String) -> Unit,
     openSettingsScreen: () -> Unit,
     refresh: (Period) -> Unit,
@@ -106,6 +115,10 @@ private fun StatelessDeviceUsageScreen(
         title = stringResource(id = R.string.app_name),
         modifier = modifier,
         topBarActions = {
+            com.atharok.screentime.ui.components.SupabaseStatusAction(
+                isConnected = isSupabaseConnected,
+                onClick = onSupabaseClick
+            )
             RefreshAction(refresh = { refresh(period) })
             SettingsAction(openSettingsScreen = openSettingsScreen)
         }

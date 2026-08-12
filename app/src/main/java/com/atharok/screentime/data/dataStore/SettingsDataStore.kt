@@ -25,6 +25,12 @@ class SettingsDataStore(private val context: Context) {
         private const val DEFAULT_PERIOD_KEY = "default_period_key"
         private const val IGNORE_SYSTEM_APP_KEY = "ignore_system_app_key"
         private const val IGNORED_PACKAGES_KEY = "ignored_packages_key"
+        private const val SUPABASE_URL_KEY = "supabase_url_key"
+        private const val SUPABASE_ANON_KEY_KEY = "supabase_anon_key_key"
+        private const val SUPABASE_EMAIL_KEY = "supabase_email_key"
+        private const val SUPABASE_PASSWORD_KEY = "supabase_password_key"
+        private const val SUPABASE_IS_CONNECTED_KEY = "supabase_is_connected_key"
+        private const val SUPABASE_LAST_SYNC_KEY = "supabase_last_sync_key"
     }
 
     private val themeKey = stringPreferencesKey(THEME_KEY)
@@ -33,6 +39,12 @@ class SettingsDataStore(private val context: Context) {
     private val defaultPeriodKey = stringPreferencesKey(DEFAULT_PERIOD_KEY)
     private val ignoreSystemAppsKey = booleanPreferencesKey(IGNORE_SYSTEM_APP_KEY)
     private val ignoredPackagesKey = stringPreferencesKey(IGNORED_PACKAGES_KEY)
+    private val supabaseUrlKey = stringPreferencesKey(SUPABASE_URL_KEY)
+    private val supabaseAnonKeyKey = stringPreferencesKey(SUPABASE_ANON_KEY_KEY)
+    private val supabaseEmailKey = stringPreferencesKey(SUPABASE_EMAIL_KEY)
+    private val supabasePasswordKey = stringPreferencesKey(SUPABASE_PASSWORD_KEY)
+    private val supabaseIsConnectedKey = booleanPreferencesKey(SUPABASE_IS_CONNECTED_KEY)
+    private val supabaseLastSyncKey = androidx.datastore.preferences.core.longPreferencesKey(SUPABASE_LAST_SYNC_KEY)
 
     private fun Flow<Preferences>.catchException(): Flow<Preferences> = this.catch {
         if (it is IOException) {
@@ -140,6 +152,52 @@ class SettingsDataStore(private val context: Context) {
             context.dataStore.edit {
                 it[ignoredPackagesKey] = jsonString
             }
+        }
+    }
+
+    // ---- Supabase ----
+
+    val supabaseCredentialsFlow: Flow<com.atharok.screentime.domain.entities.SupabaseCredentials> = context.dataStore.data
+        .catchException()
+        .map { preferences ->
+            com.atharok.screentime.domain.entities.SupabaseCredentials(
+                url = preferences[supabaseUrlKey] ?: "",
+                anonKey = preferences[supabaseAnonKeyKey] ?: "",
+                email = preferences[supabaseEmailKey] ?: "",
+                password = preferences[supabasePasswordKey] ?: ""
+            )
+        }
+
+    suspend fun saveSupabaseCredentials(credentials: com.atharok.screentime.domain.entities.SupabaseCredentials) {
+        context.dataStore.edit {
+            it[supabaseUrlKey] = credentials.url
+            it[supabaseAnonKeyKey] = credentials.anonKey
+            it[supabaseEmailKey] = credentials.email
+            it[supabasePasswordKey] = credentials.password
+        }
+    }
+
+    val supabaseIsConnectedFlow: Flow<Boolean> = context.dataStore.data
+        .catchException()
+        .map { preferences ->
+            preferences[supabaseIsConnectedKey] == true
+        }
+
+    suspend fun saveSupabaseIsConnected(isConnected: Boolean) {
+        context.dataStore.edit {
+            it[supabaseIsConnectedKey] = isConnected
+        }
+    }
+
+    val supabaseLastSyncFlow: Flow<Long> = context.dataStore.data
+        .catchException()
+        .map { preferences ->
+            preferences[supabaseLastSyncKey] ?: 0L
+        }
+
+    suspend fun saveSupabaseLastSync(timestamp: Long) {
+        context.dataStore.edit {
+            it[supabaseLastSyncKey] = timestamp
         }
     }
 }

@@ -22,4 +22,13 @@ interface SettingsRepository {
 
     fun getIgnoredPackages(): Flow<List<String>>
     suspend fun saveIgnoredPackages(ignoredPackages: List<String>)
+
+    fun getSupabaseCredentials(): Flow<com.atharok.screentime.domain.entities.SupabaseCredentials>
+    suspend fun saveSupabaseCredentials(credentials: com.atharok.screentime.domain.entities.SupabaseCredentials)
+
+    fun isSupabaseConnected(): Flow<Boolean>
+    suspend fun saveSupabaseIsConnected(isConnected: Boolean)
+
+    fun getSupabaseLastSync(): Flow<Long>
+    suspend fun saveSupabaseLastSync(timestamp: Long)
 }

@@ -128,6 +128,13 @@ private val viewModelModule: Module = module {
     }
 
     viewModel {
+        SupabaseViewModel(
+            settingsUseCase = get<SettingsUseCase>(),
+            supabaseClient = get<com.atharok.screentime.data.supabase.SupabaseClient>()
+        )
+    }
+
+    viewModel {
         InstalledPackagesViewModel()
     }
 }
@@ -187,5 +194,9 @@ private val dataModule: Module = module {
         SettingsDataStore(
             context = androidContext()
         )
+    }
+
+    single {
+        com.atharok.screentime.data.supabase.SupabaseClient()
     }
 }

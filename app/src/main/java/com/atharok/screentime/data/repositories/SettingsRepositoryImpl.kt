@@ -45,4 +45,22 @@ class SettingsRepositoryImpl(
     override suspend fun saveIgnoredPackages(ignoredPackages: List<String>) {
         settingsDataStore.saveIgnoredPackages(ignoredPackages)
     }
+
+    override fun getSupabaseCredentials(): Flow<com.atharok.screentime.domain.entities.SupabaseCredentials> = settingsDataStore.supabaseCredentialsFlow
+
+    override suspend fun saveSupabaseCredentials(credentials: com.atharok.screentime.domain.entities.SupabaseCredentials) {
+        settingsDataStore.saveSupabaseCredentials(credentials)
+    }
+
+    override fun isSupabaseConnected(): Flow<Boolean> = settingsDataStore.supabaseIsConnectedFlow
+
+    override suspend fun saveSupabaseIsConnected(isConnected: Boolean) {
+        settingsDataStore.saveSupabaseIsConnected(isConnected)
+    }
+
+    override fun getSupabaseLastSync(): Flow<Long> = settingsDataStore.supabaseLastSyncFlow
+
+    override suspend fun saveSupabaseLastSync(timestamp: Long) {
+        settingsDataStore.saveSupabaseLastSync(timestamp)
+    }
 }

@@ -70,3 +70,21 @@ fun RefreshAction(
         modifier = modifier
     )
 }
+
+@Composable
+fun SupabaseStatusAction(
+    isConnected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = modifier
+    ) {
+        Icon(
+            imageVector = androidx.compose.material.icons.Icons.Rounded.Storage,
+            contentDescription = "Supabase Status",
+            tint = if (isConnected) androidx.compose.ui.graphics.Color(0xFF4CAF50) else androidx.compose.material3.LocalContentColor.current
+        )
+    }
+}

@@ -61,6 +61,7 @@ fun SettingsScreen(
     openIgnoredAppsScreen: () -> Unit,
     openThirdLibrariesScreen: () -> Unit,
     settingsViewModel: SettingsViewModel,
+    supabaseViewModel: com.atharok.screentime.presentation.viewmodel.SupabaseViewModel,
     modifier: Modifier = Modifier
 ) {
     AppScaffold(
@@ -196,6 +197,24 @@ fun SettingsScreen(
                     .clickable {
                         openIgnoredAppsScreen()
                     }
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = horizontalPadding,
+                        vertical = verticalPadding
+                    )
+            )
+
+            HorizontalDivider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = verticalPadding)
+            )
+
+            // ---- Supabase Integration ----
+
+            SupabaseSettingsSection(
+                supabaseViewModel = supabaseViewModel,
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(
                         horizontal = horizontalPadding,
@@ -477,6 +496,200 @@ private fun SettingsText(
         TextNormal(
             text = text,
             modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+@Composable
+private fun SupabaseSettingsSection(
+    supabaseViewModel: com.atharok.screentime.presentation.viewmodel.SupabaseViewModel,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val credentials by supabaseViewModel.credentialsFlow.collectAsStateWithLifecycle(
+        initialValue = com.atharok.screentime.domain.entities.SupabaseCredentials()
+    )
+    val isConnected by supabaseViewModel.isConnectedFlow.collectAsStateWithLifecycle(initialValue = false)
+    val isTesting by supabaseViewModel.isTestingConnection.collectAsStateWithLifecycle(initialValue = false)
+    val testMessage by supabaseViewModel.testResultMessage.collectAsStateWithLifecycle(initialValue = null)
+
+    var urlInput by remember(credentials.url) { mutableStateOf(credentials.url) }
+    var anonKeyInput by remember(credentials.anonKey) { mutableStateOf(credentials.anonKey) }
+    var emailInput by remember(credentials.email) { mutableStateOf(credentials.email) }
+    var passwordInput by remember(credentials.password) { mutableStateOf(credentials.password) }
+
+    var showJsonImportDialog by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small))
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SettingsTitle(
+                text = "Koneksi Supabase",
+                icon = androidx.compose.material.icons.Icons.Rounded.Storage,
+                iconDescription = "Supabase Settings",
+                modifier = Modifier.weight(1f)
+            )
+
+            androidx.compose.material3.IconButton(
+                onClick = { showJsonImportDialog = true }
+            ) {
+                androidx.compose.material3.Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Rounded.CloudDownload,
+                    contentDescription = "Impor Kredensial JSON",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small))
+        ) {
+            TextNormalSecondary(text = "Status: ")
+            TextNormal(
+                text = if (isConnected) "Online (Terhubung)" else "Offline (Belum Terhubung)",
+                color = if (isConnected) androidx.compose.ui.graphics.Color(0xFF4CAF50) else MaterialTheme.colorScheme.error
+            )
+        }
+
+        androidx.compose.material3.OutlinedTextField(
+            value = urlInput,
+            onValueChange = {
+                urlInput = it
+                supabaseViewModel.saveCredentials(credentials.copy(url = it))
+            },
+            label = { androidx.compose.material3.Text("Supabase URL") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        androidx.compose.material3.OutlinedTextField(
+            value = anonKeyInput,
+            onValueChange = {
+                anonKeyInput = it
+                supabaseViewModel.saveCredentials(credentials.copy(anonKey = it))
+            },
+            label = { androidx.compose.material3.Text("Anon Key") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        androidx.compose.material3.OutlinedTextField(
+            value = emailInput,
+            onValueChange = {
+                emailInput = it
+                supabaseViewModel.saveCredentials(credentials.copy(email = it))
+            },
+            label = { androidx.compose.material3.Text("Email") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        androidx.compose.material3.OutlinedTextField(
+            value = passwordInput,
+            onValueChange = {
+                passwordInput = it
+                supabaseViewModel.saveCredentials(credentials.copy(password = it))
+            },
+            label = { androidx.compose.material3.Text("Password") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
+        )
+
+        testMessage?.let { msg ->
+            TextNormalSecondary(
+                text = msg,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = dimensionResource(id = R.dimen.padding_small))
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = dimensionResource(id = R.dimen.padding_small)),
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
+        ) {
+            androidx.compose.material3.Button(
+                onClick = { supabaseViewModel.testConnection() },
+                enabled = !isTesting,
+                modifier = Modifier.weight(1f)
+            ) {
+                androidx.compose.material3.Text(if (isTesting) "Menguji..." else "Tes Koneksi")
+            }
+
+            androidx.compose.material3.OutlinedButton(
+                onClick = { supabaseViewModel.triggerManualSync(context) },
+                modifier = Modifier.weight(1f)
+            ) {
+                androidx.compose.material3.Text("Sync Sekarang")
+            }
+        }
+    }
+
+    if (showJsonImportDialog) {
+        var jsonTextState by remember {
+            mutableStateOf(
+                """
+                {
+                  "supabase": {
+                    "url": "https://pcoyvfhcniscynjkndlw.supabase.co",
+                    "anonKey": "sb_publishable_4HYaHZhOIECG56Eccpe4sA_xj-Ecy9n",
+                    "email": "haris443@gmail.com",
+                    "password": "B1smillAh"
+                  }
+                }
+                """.trimIndent()
+            )
+        }
+
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showJsonImportDialog = false },
+            title = { androidx.compose.material3.Text("Impor Kredensial Supabase JSON") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small))) {
+                    TextNormalSecondary("Tempelkan JSON kredensial atau gunakan preset default di bawah:")
+                    androidx.compose.material3.OutlinedTextField(
+                        value = jsonTextState,
+                        onValueChange = { jsonTextState = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .size(160.dp),
+                        maxLines = 8
+                    )
+                }
+            },
+            confirmButton = {
+                androidx.compose.material3.Button(
+                    onClick = {
+                        val success = supabaseViewModel.importJsonCredentials(jsonTextState)
+                        if (success) {
+                            showJsonImportDialog = false
+                            supabaseViewModel.testConnection()
+                        }
+                    }
+                ) {
+                    androidx.compose.material3.Text("Impor JSON")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.OutlinedButton(
+                    onClick = {
+                        supabaseViewModel.importDefaultPreset()
+                        showJsonImportDialog = false
+                        supabaseViewModel.testConnection()
+                    }
+                ) {
+                    androidx.compose.material3.Text("Gunakan Preset")
+                }
+            }
         )
     }
 }

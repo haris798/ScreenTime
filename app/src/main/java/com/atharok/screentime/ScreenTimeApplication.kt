@@ -12,5 +12,6 @@ class ScreenTimeApplication: Application() {
             androidContext(this@ScreenTimeApplication)
             modules(appModules)
         }
+        com.atharok.screentime.data.workers.SupabaseSyncWorker.schedule(this)
     }
 }
