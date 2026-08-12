@@ -553,7 +553,7 @@ private fun SupabaseSettingsSection(
         ) {
             SettingsTitle(
                 text = "Koneksi Supabase",
-                icon = Icons.Rounded.Storage,
+                icon = com.atharok.screentime.ui.components.SupabaseLogoIcon,
                 iconDescription = "Supabase Settings",
                 modifier = Modifier.weight(1f)
             )
@@ -576,7 +576,7 @@ private fun SupabaseSettingsSection(
             TextNormalSecondary(text = "Status: ")
             TextNormal(
                 text = if (isConnected) "Online (Terhubung)" else "Offline (Belum Terhubung)",
-                color = if (isConnected) androidx.compose.ui.graphics.Color(0xFF4CAF50) else MaterialTheme.colorScheme.error
+                color = if (isConnected) com.atharok.screentime.ui.components.SupabaseOfficialGreen else MaterialTheme.colorScheme.error
             )
         }
 

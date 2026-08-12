@@ -83,9 +83,9 @@ fun SupabaseStatusAction(
         modifier = modifier
     ) {
         Icon(
-            imageVector = Icons.Rounded.Storage,
+            imageVector = SupabaseLogoIcon,
             contentDescription = "Supabase Status",
-            tint = if (isConnected) androidx.compose.ui.graphics.Color(0xFF4CAF50) else androidx.compose.material3.LocalContentColor.current
+            tint = if (isConnected) SupabaseOfficialGreen else androidx.compose.material3.LocalContentColor.current
         )
     }
 }
