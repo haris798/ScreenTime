@@ -1,6 +1,8 @@
 package com.atharok.screentime.presentation.viewmodel
 
 import android.content.Context
+import android.net.Uri
+import android.os.Environment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Constraints
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import java.io.File
 
 class SupabaseViewModel(
     private val settingsUseCase: SettingsUseCase,
@@ -43,26 +46,58 @@ class SupabaseViewModel(
         }
     }
 
-    fun importDefaultPreset() {
-        val presetJson = """
-            {
-              "supabase": {
-                "url": "https://pcoyvfhcniscynjkndlw.supabase.co",
-                "anonKey": "sb_publishable_4HYaHZhOIECG56Eccpe4sA_xj-Ecy9n",
-                "email": "haris443@gmail.com",
-                "password": "B1smillAh"
-              }
+    fun importJsonFromUri(context: Context, uri: Uri): Boolean {
+        return try {
+            val content = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                inputStream.bufferedReader().use { it.readText() }
+            } ?: return false
+            importJsonCredentials(content)
+        } catch (e: Exception) {
+            _testResultMessage.value = "Gagal membaca file JSON: ${e.localizedMessage}"
+            false
+        }
+    }
+
+    fun importFromDownloadFolder(context: Context): Boolean {
+        return try {
+            val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val jsonFiles = downloadDir.listFiles { file -> file.extension.equals("json", ignoreCase = true) }
+            if (jsonFiles.isNullOrEmpty()) {
+                _testResultMessage.value = "Tidak ditemukan file .json di folder Download"
+                return false
             }
-        """.trimIndent()
-        importJsonCredentials(presetJson)
+            // Pick the most recently modified json file
+            val latestJsonFile = jsonFiles.maxByOrNull { it.lastModified() } ?: return false
+            val content = latestJsonFile.readText()
+            val success = importJsonCredentials(content)
+            if (success) {
+                _testResultMessage.value = "Kredensial berhasil diimpor dari ${latestJsonFile.name}"
+            }
+            success
+        } catch (e: Exception) {
+            _testResultMessage.value = "Gagal mengakses folder Download: ${e.localizedMessage}"
+            false
+        }
     }
 
     fun importJsonCredentials(jsonString: String): Boolean {
         return try {
-            val root = json.decodeFromString<SupabaseJsonRoot>(jsonString)
-            saveCredentials(root.supabase)
-            _testResultMessage.value = "Kredensial Supabase berhasil diimpor!"
-            true
+            val credentials = try {
+                val root = json.decodeFromString<SupabaseJsonRoot>(jsonString)
+                root.supabase
+            } catch (_: Exception) {
+                json.decodeFromString<SupabaseCredentials>(jsonString)
+            }
+
+            if (credentials.url.isNotBlank()) {
+                saveCredentials(credentials)
+                _testResultMessage.value = "Kredensial Supabase berhasil diimpor!"
+                testConnection()
+                true
+            } else {
+                _testResultMessage.value = "Format JSON kredensial tidak valid"
+                false
+            }
         } catch (e: Exception) {
             _testResultMessage.value = "Gagal memproses JSON: ${e.localizedMessage}"
             false

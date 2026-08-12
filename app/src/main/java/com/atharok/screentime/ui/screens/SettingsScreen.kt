@@ -5,6 +5,8 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -535,6 +537,17 @@ private fun SupabaseSettingsSection(
     val isTesting by supabaseViewModel.isTestingConnection.collectAsStateWithLifecycle(initialValue = false)
     val testMessage by supabaseViewModel.testResultMessage.collectAsStateWithLifecycle(initialValue = null)
 
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            val success = supabaseViewModel.importJsonFromUri(context, it)
+            if (success) {
+                supabaseViewModel.testConnection()
+            }
+        }
+    }
+
     var urlInput by remember(credentials.url) { mutableStateOf(credentials.url) }
     var anonKeyInput by remember(credentials.anonKey) { mutableStateOf(credentials.anonKey) }
     var emailInput by remember(credentials.email) { mutableStateOf(credentials.email) }
@@ -563,7 +576,7 @@ private fun SupabaseSettingsSection(
             ) {
                 androidx.compose.material3.Icon(
                     imageVector = Icons.Rounded.CloudDownload,
-                    contentDescription = "Impor Kredensial JSON",
+                    contentDescription = "Impor File JSON Supabase",
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -657,59 +670,67 @@ private fun SupabaseSettingsSection(
     }
 
     if (showJsonImportDialog) {
-        var jsonTextState by remember {
-            mutableStateOf(
-                """
-                {
-                  "supabase": {
-                    "url": "https://pcoyvfhcniscynjkndlw.supabase.co",
-                    "anonKey": "sb_publishable_4HYaHZhOIECG56Eccpe4sA_xj-Ecy9n",
-                    "email": "haris443@gmail.com",
-                    "password": "B1smillAh"
-                  }
-                }
-                """.trimIndent()
-            )
-        }
+        var jsonTextState by remember { mutableStateOf("") }
 
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { showJsonImportDialog = false },
-            title = { androidx.compose.material3.Text("Impor Kredensial Supabase JSON") },
+            title = { androidx.compose.material3.Text("Impor File JSON Supabase") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small))) {
-                    TextNormalSecondary("Tempelkan JSON kredensial atau gunakan preset default di bawah:")
+                    TextNormalSecondary("Pilih file .json dari penyimpanan/Download atau tempel teks JSON di bawah:")
+                    
+                    androidx.compose.material3.Button(
+                        onClick = {
+                            showJsonImportDialog = false
+                            filePickerLauncher.launch("*/*")
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        androidx.compose.material3.Text("📁 Pilih File JSON")
+                    }
+
+                    androidx.compose.material3.OutlinedButton(
+                        onClick = {
+                            val success = supabaseViewModel.importFromDownloadFolder(context)
+                            if (success) {
+                                showJsonImportDialog = false
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        androidx.compose.material3.Text("⬇️ Impor dari Folder Download")
+                    }
+
                     androidx.compose.material3.OutlinedTextField(
                         value = jsonTextState,
                         onValueChange = { jsonTextState = it },
+                        label = { androidx.compose.material3.Text("Tempel Teks JSON") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .size(160.dp),
-                        maxLines = 8
+                            .size(140.dp),
+                        maxLines = 6
                     )
                 }
             },
             confirmButton = {
                 androidx.compose.material3.Button(
                     onClick = {
-                        val success = supabaseViewModel.importJsonCredentials(jsonTextState)
-                        if (success) {
-                            showJsonImportDialog = false
-                            supabaseViewModel.testConnection()
+                        if (jsonTextState.isNotBlank()) {
+                            val success = supabaseViewModel.importJsonCredentials(jsonTextState)
+                            if (success) {
+                                showJsonImportDialog = false
+                            }
                         }
                     }
                 ) {
-                    androidx.compose.material3.Text("Impor JSON")
+                    androidx.compose.material3.Text("Proses Teks JSON")
                 }
             },
             dismissButton = {
                 androidx.compose.material3.OutlinedButton(
-                    onClick = {
-                        supabaseViewModel.importDefaultPreset()
-                        showJsonImportDialog = false
-                        supabaseViewModel.testConnection()
-                    }
+                    onClick = { showJsonImportDialog = false }
                 ) {
-                    androidx.compose.material3.Text("Gunakan Preset")
+                    androidx.compose.material3.Text("Batal")
                 }
             }
         )
