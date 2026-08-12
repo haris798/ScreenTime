@@ -51,18 +51,21 @@ android {
 
     flavorDimensions += "version"
     productFlavors {
+        val releaseConfig = signingConfigs.getByName("release")
+        val activeSigningConfig = if (releaseConfig.storeFile != null) {
+            releaseConfig
+        } else {
+            signingConfigs.getByName("debug")
+        }
+
         create("default") {
             dimension = "version"
-            val releaseConfig = signingConfigs.getByName("release")
-            signingConfig = if (releaseConfig.storeFile != null) {
-                releaseConfig
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            signingConfig = activeSigningConfig
         }
         create("gplay") {
             dimension = "version"
             applicationIdSuffix = ".gplay"
+            signingConfig = activeSigningConfig
         }
     }
 
